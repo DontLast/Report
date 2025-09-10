@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Блог система</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .header {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+        }
+
+        .admin-panel {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+        }
+
+        .auth-btn, .admin-btn, .logout-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 10px 20px;
+            border: 2px solid white;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .auth-btn:hover, .admin-btn:hover, .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .main-content {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding-top: 80px;
+        }
+
+        /* Стили для аутентификации */
+        .auth-container {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 500px;
+        }
+
+        /* Стили для блога */
+        .blog-container {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 800px;
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 32px;
+        }
+
+        h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+
+        .auth-tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #888;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab-btn.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .tab-btn:hover {
+            color: #667eea;
+        }
+
+        .auth-form, .post-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        label {
+            font-weight: bold;
+            color: #555;
+            font-size: 14px;
+        }
+
+        input, textarea {
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .submit-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .message {
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .message.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .switch-text {
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+        }
+
+        .switch-link {
+            color: #667eea;
+            cursor: pointer;
+            text-decoration: underline;
+            font-weight: bold;
+        }
+
+        .user-welcome {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            border-radius: 10px;
+            color: #155724;
+        }
+
+        .user-welcome h2 {
+            margin: 0;
+            color: #155724;
+        }
+
+        /* Стили для постов */
+        .posts-list {
+            display: grid;
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .post-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .post-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .post-author {
+            font-weight: bold;
+            color: #495057;
+        }
+
+        .post-date {
+            color: #6c757d;
+            font-size: 14px;
+        }
+
+        .post-content {
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .post-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .no-posts {
+            text-align: center;
+            color: #6c757d;
+            padding: 40px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border: 2px dashed #dee2e6;
+        }
+
+        /* Модальные окна */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        .modal-cancel {
+            background: #6c757d;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .modal-submit {
+            background: #28a745;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .header, .admin-panel {
+                position: static;
+                margin-bottom: 20px;
+                justify-content: center;
+            }
+
+            .auth-container, .blog-container {
+                padding: 20px;
+                margin: 10px;
+            }
+
+            .main-content {
+                padding-top: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- Кнопка админа -->
+        <div class="admin-panel">
+            <button v-if="!currentUser" class="admin-btn" @click="showAdminModal = true">
+                Админ
+            </button>
+        </div>
+
+        <!-- Кнопки в header -->
+        <div class="header">
+            <button v-if="currentUser" class="logout-btn" @click="logout">
+                Выйти
+            </button>
+            <button v-if="!currentUser" class="auth-btn" @click="switchAuthMode">
+                {{ currentMode === 'register' ? 'Войти' : 'Зарегистрироваться' }}
+            </button>
+        </div>
+
+        <div class="main-content">
+            <!-- Модальное окно админа -->
+            <div v-if="showAdminModal" class="modal">
+                <div class="modal-content">
+                    <h2>Вход в панель администратора</h2>
+                    <form @submit.prevent="checkAdminPassword" class="auth-form">
+                        <div class="form-group">
+                            <input
+                                type="password"
+                                v-model="adminPassword"
+                                placeholder="Введите пароль администратора"
+                                required
+                            >
+                        </div>
+                        <div class="modal-buttons">
+                            <button type="button" @click="showAdminModal = false" class="modal-cancel">
+                                Отмена
+                            </button>
+                            <button type="submit" class="modal-submit">
+                                Войти
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Панель управления пользователями -->
+            <div v-if="showUsersManagement" class="blog-container">
+                <div class="users-header">
+                    <h1>Управление пользователями</h1>
+                    <button @click="showUsersManagement = false" class="logout-btn">
+                        Назад в блог
+                    </button>
+                </div>
+                <div v-if="adminUsers.length === 0" class="message">
+                    Нет зарегистрированных пользователей
+                </div>
+                <div v-else class="posts-list">
+                    <div v-for="user in adminUsers" :key="user.id" class="post-card">
+                        <div class="post-header">
+                            <span class="post-author">{{ user.full_name }} ({{ user.username }})</span>
+                        </div>
+                        <div class="post-content">
+                            <p>Email: {{ user.email }}</p>
+                            <p>ID: {{ user.id }}</p>
+                        </div>
+                        <button @click="deleteUser(user.id)" class="submit-btn" style="background: #dc3545; margin-top: 10px;">
+                            Удалить
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Формы аутентификации -->
+            <div v-if="!currentUser && !showUsersManagement" class="auth-container">
+                <h1>{{ currentMode === 'register' ? 'Регистрация' : 'Вход в систему' }}</h1>
+
+                <div class="auth-tabs">
+                    <button class="tab-btn" :class="{ active: currentMode === 'register' }" @click="currentMode = 'register'">
+                        Регистрация
+                    </button>
+                    <button class="tab-btn" :class="{ active: currentMode === 'login' }" @click="currentMode = 'login'">
+                        Вход
+                    </button>
+                </div>
+
+                <form v-if="currentMode === 'register'" @submit.prevent="submitRegister" class="auth-form">
+                    <div class="form-group">
+                        <label>Полное имя:</label>
+                        <input
+                            type="text"
+                            v-model="registerData.full_name"
+                            required
+                            placeholder="Введите ваше полное имя"
+                        >
+                    </div>
+                    <div class="form-group">
+                        <label>Имя пользователя:</label>
+                        <input
+                            type="text"
+                            v-model="registerData.username"
+                            required
+                            placeholder="Введите имя пользователя"
+                        >
+                    </div>
+                    <div class="form-group">
+                        <label>Email:</label>
+                        <input
+                            type="email"
+                            v-model="registerData.email"
+                            required
+                            placeholder="Введите ваш email"
+                        >
+                    </div>
+                    <div class="form-group">
+                        <label>Пароль:</label>
+                        <input
+                            type="password"
+                            v-model="registerData.password"
+                            required
+                            placeholder="Введите пароль"
+                        >
+                    </div>
+                    <button type="submit" :disabled="loading" class="submit-btn">
+                        {{ loading ? 'Регистрация...' : 'Зарегистрироваться' }}
+                    </button>
+                    <div class="switch-text">
+                        Уже есть аккаунт?
+                        <span class="switch-link" @click="currentMode = 'login'">Войти</span>
+                    </div>
+                </form>
+
+                <form v-if="currentMode === 'login'" @submit.prevent="submitLogin" class="auth-form">
+                    <div class="form-group">
+                        <label>Имя пользователя или Email:</label>
+                        <input
+                            type="text"
+                            v-model="loginData.identifier"
+                            required
+                            placeholder="Введите имя пользователя или email"
+                        >
+                    </div>
+                    <div class="form-group">
+                        <label>Пароль:</label>
+                        <input
+                            type="password"
+                            v-model="loginData.password"
+                            required
+                            placeholder="Введите пароль"
+                        >
+                    </div>
+                    <button type="submit" :disabled="loading" class="submit-btn">
+                        {{ loading ? 'Вход...' : 'Войти' }}
+                    </button>
+                    <div class="switch-text">
+                        Нет аккаунта?
+                        <span class="switch-link" @click="currentMode = 'register'">Зарегистрироваться</span>
+                    </div>
+                </form>
+
+                <div v-if="message" :class="['message', messageType]">
+                    {{ message }}
+                </div>
+            </div>
+
+            <!-- Блог (после входа) -->
+            <div v-if="currentUser && !showUsersManagement" class="blog-container">
+                <div class="user-welcome">
+                    <h2>Добро пожаловать, {{ currentUser.full_name }}!</h2>
+                    <p>Ваш username: {{ currentUser.username }}</p>
+                </div>
+
+                <!-- Форма создания поста -->
+                <div class="post-form-container">
+                    <h2>Создать новый пост</h2>
+                    <form @submit.prevent="createPost" class="post-form">
+                        <div class="form-group">
+                            <label>Заголовок:</label>
+                            <input
+                                type="text"
+                                v-model="newPost.title"
+                                required
+                                placeholder="Введите заголовок поста"
+                            >
+                        </div>
+                        <div class="form-group">
+                            <label>Содержание:</label>
+                            <textarea
+                                v-model="newPost.content"
+                                required
+                                placeholder="Напишите содержание поста..."
+                            ></textarea>
+                        </div>
+                        <button type="submit" :disabled="postLoading" class="submit-btn">
+                            {{ postLoading ? 'Публикация...' : 'Опубликовать' }}
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Список постов -->
+                <div class="posts-container">
+                    <h2>Последние посты</h2>
+                    <div v-if="posts.length === 0" class="no-posts">
+                        <p>Пока нет ни одного поста. Будьте первым!</p>
+                    </div>
+                    <div v-else class="posts-list">
+                        <div v-for="post in posts" :key="post.id" class="post-card">
+                            <div class="post-header">
+                                <span class="post-author">{{ post.author_name }}</span>
+                                <span class="post-date">{{ formatDate(post.created_at) }}</span>
+                            </div>
+                            <div class="post-title">{{ post.title }}</div>
+                            <div class="post-content">{{ post.content }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { createApp, ref, onMounted, computed } = Vue;
+
+        createApp({
+            setup() {
+                const currentMode = ref('register');
+                const loading = ref(false);
+                const postLoading = ref(false);
+                const message = ref('');
+                const messageType = ref('');
+                const currentUser = ref(null);
+                const showAdminModal = ref(false);
+                const showUsersManagement = ref(false);
+                const adminPassword = ref('');
+                const adminUsers = ref([]);
+                const posts = ref([]);
+
+                const registerData = ref({
+                    full_name: '',
+                    username: '',
+                    email: '',
+                    password: ''
+                });
+
+                const loginData = ref({
+                    identifier: '',
+                    password: ''
+                });
+
+                const newPost = ref({
+                    title: '',
+                    content: ''
+                });
+
+                const API_BASE = 'http://localhost:8000';
+                const ADMIN_PASSWORD = 'admin123';
+
+                // Загрузка постов
+                const loadPosts = async () => {
+                    try {
+                        const response = await fetch(`${API_BASE}/posts/`);
+                        if (response.ok) {
+                            posts.value = await response.json();
+                        }
+                    } catch (error) {
+                        console.error('Ошибка загрузки постов:', error);
+                    }
+                };
+
+                // Создание поста
+                const createPost = async () => {
+                    if (!currentUser.value) return;
+
+                    postLoading.value = true;
+                    try {
+                        const response = await fetch(`${API_BASE}/posts/`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                title: newPost.value.title,
+                                content: newPost.value.content,
+                                author_id: currentUser.value.id
+                            })
+                        });
+
+                        if (response.ok) {
+                            const post = await response.json();
+                            posts.value.unshift(post);
+                            newPost.value = { title: '', content: '' };
+                            message.value = 'Пост успешно опубликован!';
+                            messageType.value = 'success';
+                        } else {
+                            const errorData = await response.json().catch(() => ({}));
+                            message.value = errorData.detail || 'Ошибка при публикации поста';
+                            messageType.value = 'error';
+                        }
+                    } catch (error) {
+                        message.value = 'Ошибка соединения с сервером';
+                        messageType.value = 'error';
+                    } finally {
+                        postLoading.value = false;
+                    }
+                };
+
+                // Форматирование даты
+                const formatDate = (dateString) => {
+                    const date = new Date(dateString);
+                    return date.toLocaleString('ru-RU', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                };
+
+                // Выход из системы
+                const logout = () => {
+                    currentUser.value = null;
+                    message.value = 'Вы вышли из системы';
+                    messageType.value = 'success';
+                    posts.value = [];
+                };
+
+                // Остальные функции остаются без изменений
+                const switchAuthMode = () => {
+                    currentMode.value = currentMode.value === 'register' ? 'login' : 'register';
+                    message.value = '';
+                };
+
+                const checkAdminPassword = () => {
+                    if (adminPassword.value === ADMIN_PASSWORD) {
+                        showAdminModal.value = false;
+                        showUsersManagement.value = true;
+                        loadAdminUsers();
+                        adminPassword.value = '';
+                    } else {
+                        alert('Неверный пароль администратора');
+                        adminPassword.value = '';
+                    }
+                };
+
+                const loadAdminUsers = async () => {
+                    try {
+                        const response = await fetch(`${API_BASE}/users/`);
+                        if (response.ok) {
+                            adminUsers.value = await response.json();
+                        }
+                    } catch (error) {
+                        console.error('Ошибка загрузки пользователей:', error);
+                    }
+                };
+
+                const deleteUser = async (userId) => {
+                    if (!confirm('Вы уверены, что хотите удалить этого пользователя?')) return;
+
+                    try {
+                        const response = await fetch(`${API_BASE}/users/${userId}`, {
+                            method: 'DELETE'
+                        });
+
+                        if (response.ok) {
+                            await loadAdminUsers();
+                            await loadUsers();
+                        } else {
+                            alert('Ошибка при удалении пользователя');
+                        }
+                    } catch (error) {
+                        alert('Ошибка при удалении пользователя');
+                    }
+                };
+
+                const submitRegister = async () => {
+                    loading.value = true;
+                    message.value = '';
+
+                    try {
+                        const response = await fetch(`${API_BASE}/register/`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify(registerData.value)
+                        });
+
+                        if (response.ok) {
+                            const data = await response.json();
+                            message.value = 'Регистрация успешна!';
+                            messageType.value = 'success';
+                            currentUser.value = data;
+                            await loadPosts();
+                            registerData.value = { full_name: '', username: '', email: '', password: '' };
+                        } else {
+                            const errorData = await response.json().catch(() => ({}));
+                            message.value = errorData.detail || 'Ошибка регистрации';
+                            messageType.value = 'error';
+                        }
+                    } catch (error) {
+                        message.value = 'Ошибка соединения с сервером';
+                        messageType.value = 'error';
+                    } finally {
+                        loading.value = false;
+                    }
+                };
+
+                const submitLogin = async () => {
+                    loading.value = true;
+                    message.value = '';
+
+                    try {
+                        const response = await fetch(`${API_BASE}/login/`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify(loginData.value)
+                        });
+
+                        if (response.ok) {
+                            const userData = await response.json();
+                            message.value = 'Вход выполнен успешно!';
+                            messageType.value = 'success';
+                            currentUser.value = userData;
+                            await loadPosts();
+                            loginData.value = { identifier: '', password: '' };
+                        } else {
+                            const errorData = await response.json().catch(() => ({}));
+                            message.value = errorData.detail || 'Ошибка входа';
+                            messageType.value = 'error';
+                        }
+                    } catch (error) {
+                        message.value = 'Ошибка соединения с сервером';
+                        messageType.value = 'error';
+                    } finally {
+                        loading.value = false;
+                    }
+                };
+
+                const loadUsers = async () => {
+                    try {
+                        const response = await fetch(`${API_BASE}/users/`);
+                        if (response.ok) {
+                            // Просто загружаем, но не используем здесь
+                            await response.json();
+                        }
+                    } catch (error) {
+                        console.error('Ошибка загрузки пользователей:', error);
+                    }
+                };
+
+                onMounted(() => {
+                    loadUsers();
+                });
+
+                return {
+                    currentMode,
+                    loading,
+                    postLoading,
+                    message,
+                    messageType,
+                    currentUser,
+                    showAdminModal,
+                    showUsersManagement,
+                    adminPassword,
+                    adminUsers,
+                    posts,
+                    registerData,
+                    loginData,
+                    newPost,
+                    switchAuthMode,
+                    checkAdminPassword,
+                    deleteUser,
+                    submitRegister,
+                    submitLogin,
+                    createPost,
+                    logout,
+                    formatDate
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
