@@ -57,6 +57,11 @@ class PostCreate(BaseModel):
     author_id: int
 
 
+class PostUpdate(BaseModel):
+    title: str
+    content: str
+
+
 class PostResponse(BaseModel):
     id: int
     title: str
@@ -80,6 +85,12 @@ def get_db():
 # User endpoints
 @app.post("/register/", response_model=UserResponse)
 async def register_user(user: UserCreate, db: Session = Depends(get_db)):
+    print(f"Получен запрос на регистрацию: {user}")
+
+    # Проверяем обязательные поля
+    if not all([user.email, user.username, user.password, user.full_name]):
+        raise HTTPException(status_code=400, detail="Все поля обязательны для заполнения")
+
     db_user_email = db.query(models.User).filter(models.User.email == user.email).first()
     if db_user_email:
         raise HTTPException(status_code=400, detail="Email уже зарегистрирован")
@@ -99,11 +110,14 @@ async def register_user(user: UserCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(db_user)
 
+    print(f"Пользователь успешно создан: {db_user.id}")
     return db_user
 
 
 @app.post("/login/", response_model=UserResponse)
 async def login_user(login_data: UserLogin, db: Session = Depends(get_db)):
+    print(f"Попытка входа: {login_data.identifier}")
+
     user = db.query(models.User).filter(
         (models.User.email == login_data.identifier) |
         (models.User.username == login_data.identifier)
@@ -115,12 +129,14 @@ async def login_user(login_data: UserLogin, db: Session = Depends(get_db)):
     if user.password != login_data.password:
         raise HTTPException(status_code=401, detail="Неверный пароль")
 
+    print(f"Успешный вход: {user.username}")
     return user
 
 
 @app.get("/users/", response_model=List[UserResponse])
 async def get_users(db: Session = Depends(get_db)):
     users = db.query(models.User).all()
+    print(f"Запрошен список пользователей: {len(users)} пользователей")
     return users
 
 
@@ -134,13 +150,15 @@ async def delete_user(user_id: int, db: Session = Depends(get_db)):
     db.delete(user)
     db.commit()
 
+    print(f"Пользователь удален: {user_id}")
     return {"message": "Пользователь успешно удален"}
 
 
 # Post endpoints
 @app.post("/posts/", response_model=PostResponse)
 async def create_post(post: PostCreate, db: Session = Depends(get_db)):
-    # Проверяем существование пользователя
+    print(f"Создание поста: {post.title}")
+
     user = db.query(models.User).filter(models.User.id == post.author_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="Пользователь не найден")
@@ -156,7 +174,7 @@ async def create_post(post: PostCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(db_post)
 
-    # Возвращаем пост с именем автора
+    print(f"Пост создан: {db_post.id}")
     return {
         "id": db_post.id,
         "title": db_post.title,
@@ -183,6 +201,7 @@ async def get_posts(db: Session = Depends(get_db)):
             "created_at": post.created_at
         })
 
+    print(f"Запрошены посты: {len(result)} постов")
     return result
 
 
@@ -191,6 +210,30 @@ async def get_post(post_id: int, db: Session = Depends(get_db)):
     post = db.query(models.Post).filter(models.Post.id == post_id).first()
     if not post:
         raise HTTPException(status_code=404, detail="Пост не найден")
+
+    user = db.query(models.User).filter(models.User.id == post.author_id).first()
+
+    return {
+        "id": post.id,
+        "title": post.title,
+        "content": post.content,
+        "author_id": post.author_id,
+        "author_name": user.username if user else "Неизвестный автор",
+        "created_at": post.created_at
+    }
+
+
+@app.put("/posts/{post_id}", response_model=PostResponse)
+async def update_post(post_id: int, post_data: PostUpdate, db: Session = Depends(get_db)):
+    post = db.query(models.Post).filter(models.Post.id == post_id).first()
+    if not post:
+        raise HTTPException(status_code=404, detail="Пост не найден")
+
+    post.title = post_data.title
+    post.content = post_data.content
+
+    db.commit()
+    db.refresh(post)
 
     user = db.query(models.User).filter(models.User.id == post.author_id).first()
 
@@ -225,3 +268,9 @@ async def serve_frontend():
 @app.get("/health")
 async def health_check():
     return {"status": "ok", "message": "Server is running"}
+
+
+# Эндпоинт для проверки соединения
+@app.get("/test")
+async def test_connection():
+    return {"message": "Сервер работает", "timestamp": datetime.now().isoformat()}

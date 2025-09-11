@@ -35,7 +35,7 @@
             z-index: 1000;
         }
 
-        .auth-btn, .admin-btn, .logout-btn {
+        .auth-btn, .admin-btn, .logout-btn, .add-post-btn {
             background: rgba(255, 255, 255, 0.2);
             color: white;
             padding: 10px 20px;
@@ -48,9 +48,13 @@
             backdrop-filter: blur(10px);
         }
 
-        .auth-btn:hover, .admin-btn:hover, .logout-btn:hover {
+        .auth-btn:hover, .admin-btn:hover, .logout-btn:hover, .add-post-btn:hover {
             background: rgba(255, 255, 255, 0.3);
             transform: translateY(-2px);
+        }
+
+        .add-post-btn {
+            background: rgba(40, 167, 69, 0.8);
         }
 
         .main-content {
@@ -123,7 +127,7 @@
             color: #667eea;
         }
 
-        .auth-form, .post-form {
+        .auth-form {
             display: flex;
             flex-direction: column;
             gap: 20px;
@@ -232,17 +236,24 @@
         }
 
         /* Стили для постов */
-        .posts-list {
+        .posts-feed {
             display: grid;
-            gap: 20px;
+            gap: 25px;
             margin-top: 30px;
         }
 
         .post-card {
             background: #f8f9fa;
-            padding: 20px;
-            border-radius: 10px;
+            padding: 25px;
+            border-radius: 12px;
             border-left: 4px solid #667eea;
+            position: relative;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .post-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
 
         .post-header {
@@ -257,6 +268,7 @@
         .post-author {
             font-weight: bold;
             color: #495057;
+            font-size: 16px;
         }
 
         .post-date {
@@ -267,22 +279,64 @@
         .post-content {
             color: #333;
             line-height: 1.6;
+            margin-bottom: 15px;
         }
 
         .post-title {
-            font-size: 18px;
+            font-size: 20px;
             font-weight: bold;
-            color: #333;
-            margin-bottom: 10px;
+            color: #2c3e50;
+            margin-bottom: 12px;
+        }
+
+        .post-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+
+        .action-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .edit-btn {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .edit-btn:hover {
+            background: #e0a800;
+        }
+
+        .delete-btn {
+            background: #dc3545;
+            color: white;
+        }
+
+        .delete-btn:hover {
+            background: #c82333;
         }
 
         .no-posts {
             text-align: center;
             color: #6c757d;
-            padding: 40px;
+            padding: 60px 40px;
             background: #f8f9fa;
             border-radius: 10px;
             border: 2px dashed #dee2e6;
+        }
+
+        .no-posts h3 {
+            margin-bottom: 10px;
+            color: #495057;
         }
 
         /* Модальные окна */
@@ -304,8 +358,43 @@
             padding: 30px;
             border-radius: 15px;
             width: 90%;
-            max-width: 400px;
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .modal-title {
+            font-size: 24px;
+            color: #333;
+            margin: 0;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #6c757d;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-modal:hover {
+            color: #333;
         }
 
         .modal-buttons {
@@ -318,19 +407,29 @@
         .modal-cancel {
             background: #6c757d;
             color: white;
-            padding: 10px 20px;
+            padding: 12px 24px;
             border: none;
             border-radius: 8px;
             cursor: pointer;
+            font-size: 14px;
+        }
+
+        .modal-cancel:hover {
+            background: #5a6268;
         }
 
         .modal-submit {
             background: #28a745;
             color: white;
-            padding: 10px 20px;
+            padding: 12px 24px;
             border: none;
             border-radius: 8px;
             cursor: pointer;
+            font-size: 14px;
+        }
+
+        .modal-submit:hover {
+            background: #218838;
         }
 
         /* Адаптивность */
@@ -349,6 +448,16 @@
             .main-content {
                 padding-top: 20px;
             }
+
+            .post-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .post-actions {
+                justify-content: flex-start;
+            }
         }
     </style>
 </head>
@@ -363,6 +472,9 @@
 
         <!-- Кнопки в header -->
         <div class="header">
+            <button v-if="currentUser" class="add-post-btn" @click="showCreateModal = true">
+                + Новый пост
+            </button>
             <button v-if="currentUser" class="logout-btn" @click="logout">
                 Выйти
             </button>
@@ -375,13 +487,17 @@
             <!-- Модальное окно админа -->
             <div v-if="showAdminModal" class="modal">
                 <div class="modal-content">
-                    <h2>Вход в панель администратора</h2>
+                    <div class="modal-header">
+                        <h3 class="modal-title">Вход в панель администратора</h3>
+                        <button class="close-modal" @click="showAdminModal = false">×</button>
+                    </div>
                     <form @submit.prevent="checkAdminPassword" class="auth-form">
                         <div class="form-group">
+                            <label>Пароль администратора:</label>
                             <input
                                 type="password"
                                 v-model="adminPassword"
-                                placeholder="Введите пароль администратора"
+                                placeholder="Введите пароль"
                                 required
                             >
                         </div>
@@ -397,18 +513,94 @@
                 </div>
             </div>
 
+            <!-- Модальное окно создания поста -->
+            <div v-if="showCreateModal" class="modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3 class="modal-title">Создать новый пост</h3>
+                        <button class="close-modal" @click="closeCreateModal">×</button>
+                    </div>
+                    <form @submit.prevent="createPost" class="auth-form">
+                        <div class="form-group">
+                            <label>Заголовок:</label>
+                            <input
+                                type="text"
+                                v-model="newPost.title"
+                                required
+                                placeholder="Введите заголовок поста"
+                            >
+                        </div>
+                        <div class="form-group">
+                            <label>Содержание:</label>
+                            <textarea
+                                v-model="newPost.content"
+                                required
+                                placeholder="Напишите содержание поста..."
+                                rows="5"
+                            ></textarea>
+                        </div>
+                        <div class="modal-buttons">
+                            <button type="button" @click="closeCreateModal" class="modal-cancel">
+                                Отмена
+                            </button>
+                            <button type="submit" :disabled="postLoading" class="modal-submit">
+                                {{ postLoading ? 'Публикация...' : 'Опубликовать' }}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Модальное окно редактирования поста -->
+            <div v-if="showEditModal" class="modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3 class="modal-title">Редактировать пост</h3>
+                        <button class="close-modal" @click="showEditModal = false">×</button>
+                    </div>
+                    <form @submit.prevent="updatePost" class="auth-form">
+                        <div class="form-group">
+                            <label>Заголовок:</label>
+                            <input
+                                type="text"
+                                v-model="editPost.title"
+                                required
+                                placeholder="Введите заголовок поста"
+                            >
+                        </div>
+                        <div class="form-group">
+                            <label>Содержание:</label>
+                            <textarea
+                                v-model="editPost.content"
+                                required
+                                placeholder="Напишите содержание поста..."
+                                rows="5"
+                            ></textarea>
+                        </div>
+                        <div class="modal-buttons">
+                            <button type="button" @click="showEditModal = false" class="modal-cancel">
+                                Отмена
+                            </button>
+                            <button type="submit" :disabled="postLoading" class="modal-submit">
+                                {{ postLoading ? 'Сохранение...' : 'Сохранить' }}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
             <!-- Панель управления пользователями -->
             <div v-if="showUsersManagement" class="blog-container">
-                <div class="users-header">
-                    <h1>Управление пользователями</h1>
-                    <button @click="showUsersManagement = false" class="logout-btn">
-                        Назад в блог
-                    </button>
+                <div class="user-welcome">
+                    <h2>Панель управления пользователями</h2>
                 </div>
+                <button @click="showUsersManagement = false" class="submit-btn" style="margin-bottom: 20px;">
+                    ← Назад в блог
+                </button>
                 <div v-if="adminUsers.length === 0" class="message">
                     Нет зарегистрированных пользователей
                 </div>
-                <div v-else class="posts-list">
+                <div v-else class="posts-feed">
                     <div v-for="user in adminUsers" :key="user.id" class="post-card">
                         <div class="post-header">
                             <span class="post-author">{{ user.full_name }} ({{ user.username }})</span>
@@ -417,9 +609,11 @@
                             <p>Email: {{ user.email }}</p>
                             <p>ID: {{ user.id }}</p>
                         </div>
-                        <button @click="deleteUser(user.id)" class="submit-btn" style="background: #dc3545; margin-top: 10px;">
-                            Удалить
-                        </button>
+                        <div class="post-actions">
+                            <button @click="deleteUser(user.id)" class="delete-btn">
+                                Удалить
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -520,43 +714,20 @@
             <div v-if="currentUser && !showUsersManagement" class="blog-container">
                 <div class="user-welcome">
                     <h2>Добро пожаловать, {{ currentUser.full_name }}!</h2>
-                    <p>Ваш username: {{ currentUser.username }}</p>
+                    <p>Делитесь своими мыслями с сообществом</p>
                 </div>
 
-                <!-- Форма создания поста -->
-                <div class="post-form-container">
-                    <h2>Создать новый пост</h2>
-                    <form @submit.prevent="createPost" class="post-form">
-                        <div class="form-group">
-                            <label>Заголовок:</label>
-                            <input
-                                type="text"
-                                v-model="newPost.title"
-                                required
-                                placeholder="Введите заголовок поста"
-                            >
-                        </div>
-                        <div class="form-group">
-                            <label>Содержание:</label>
-                            <textarea
-                                v-model="newPost.content"
-                                required
-                                placeholder="Напишите содержание поста..."
-                            ></textarea>
-                        </div>
-                        <button type="submit" :disabled="postLoading" class="submit-btn">
-                            {{ postLoading ? 'Публикация...' : 'Опубликовать' }}
-                        </button>
-                    </form>
-                </div>
-
-                <!-- Список постов -->
+                <!-- Лента постов -->
                 <div class="posts-container">
-                    <h2>Последние посты</h2>
+                    <h2>Лента постов</h2>
                     <div v-if="posts.length === 0" class="no-posts">
-                        <p>Пока нет ни одного поста. Будьте первым!</p>
+                        <h3>Пока нет постов</h3>
+                        <p>Будьте первым, кто поделится чем-то интересным!</p>
+                        <button @click="showCreateModal = true" class="submit-btn" style="margin-top: 20px;">
+                            Создать первый пост
+                        </button>
                     </div>
-                    <div v-else class="posts-list">
+                    <div v-else class="posts-feed">
                         <div v-for="post in posts" :key="post.id" class="post-card">
                             <div class="post-header">
                                 <span class="post-author">{{ post.author_name }}</span>
@@ -564,6 +735,14 @@
                             </div>
                             <div class="post-title">{{ post.title }}</div>
                             <div class="post-content">{{ post.content }}</div>
+                            <div v-if="post.author_id === currentUser.id" class="post-actions">
+                                <button @click="openEditModal(post)" class="edit-btn">
+                                    Редактировать
+                                </button>
+                                <button @click="deletePost(post.id)" class="delete-btn">
+                                    Удалить
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -572,7 +751,7 @@
     </div>
 
     <script>
-        const { createApp, ref, onMounted, computed } = Vue;
+        const { createApp, ref, onMounted } = Vue;
 
         createApp({
             setup() {
@@ -584,6 +763,8 @@
                 const currentUser = ref(null);
                 const showAdminModal = ref(false);
                 const showUsersManagement = ref(false);
+                const showCreateModal = ref(false);
+                const showEditModal = ref(false);
                 const adminPassword = ref('');
                 const adminUsers = ref([]);
                 const posts = ref([]);
@@ -605,8 +786,14 @@
                     content: ''
                 });
 
+                const editPost = ref({
+                    id: null,
+                    title: '',
+                    content: ''
+                });
+
                 const API_BASE = 'http://localhost:8000';
-                const ADMIN_PASSWORD = 'admin123';
+                const ADMIN_PASSWORD = '1111';
 
                 // Загрузка постов
                 const loadPosts = async () => {
@@ -641,9 +828,10 @@
                         if (response.ok) {
                             const post = await response.json();
                             posts.value.unshift(post);
-                            newPost.value = { title: '', content: '' };
+                            closeCreateModal();
                             message.value = 'Пост успешно опубликован!';
                             messageType.value = 'success';
+                            setTimeout(() => { message.value = ''; }, 3000);
                         } else {
                             const errorData = await response.json().catch(() => ({}));
                             message.value = errorData.detail || 'Ошибка при публикации поста';
@@ -655,6 +843,81 @@
                     } finally {
                         postLoading.value = false;
                     }
+                };
+
+                // Редактирование поста
+                const openEditModal = (post) => {
+                    editPost.value = {
+                        id: post.id,
+                        title: post.title,
+                        content: post.content
+                    };
+                    showEditModal.value = true;
+                };
+
+                const updatePost = async () => {
+                    postLoading.value = true;
+                    try {
+                        const response = await fetch(`${API_BASE}/posts/${editPost.value.id}`, {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                title: editPost.value.title,
+                                content: editPost.value.content
+                            })
+                        });
+
+                        if (response.ok) {
+                            const updatedPost = await response.json();
+                            const index = posts.value.findIndex(p => p.id === updatedPost.id);
+                            if (index !== -1) {
+                                posts.value[index] = updatedPost;
+                            }
+                            showEditModal.value = false;
+                            message.value = 'Пост успешно обновлен!';
+                            messageType.value = 'success';
+                            setTimeout(() => { message.value = ''; }, 3000);
+                        } else {
+                            const errorData = await response.json().catch(() => ({}));
+                            message.value = errorData.detail || 'Ошибка при обновлении поста';
+                            messageType.value = 'error';
+                        }
+                    } catch (error) {
+                        message.value = 'Ошибка соединения с сервером';
+                        messageType.value = 'error';
+                    } finally {
+                        postLoading.value = false;
+                    }
+                };
+
+                // Удаление поста
+                const deletePost = async (postId) => {
+                    if (!confirm('Вы уверены, что хотите удалить этот пост?')) return;
+
+                    try {
+                        const response = await fetch(`${API_BASE}/posts/${postId}`, {
+                            method: 'DELETE'
+                        });
+
+                        if (response.ok) {
+                            posts.value = posts.value.filter(post => post.id !== postId);
+                            message.value = 'Пост успешно удален!';
+                            messageType.value = 'success';
+                            setTimeout(() => { message.value = ''; }, 3000);
+                        } else {
+                            alert('Ошибка при удалении поста');
+                        }
+                    } catch (error) {
+                        alert('Ошибка при удалении поста');
+                    }
+                };
+
+                // Закрытие модальных окон
+                const closeCreateModal = () => {
+                    showCreateModal.value = false;
+                    newPost.value = { title: '', content: '' };
                 };
 
                 // Форматирование даты
@@ -675,9 +938,10 @@
                     message.value = 'Вы вышли из системы';
                     messageType.value = 'success';
                     posts.value = [];
+                    setTimeout(() => { message.value = ''; }, 3000);
                 };
 
-                // Остальные функции остаются без изменений
+                // Остальные функции
                 const switchAuthMode = () => {
                     currentMode.value = currentMode.value === 'register' ? 'login' : 'register';
                     message.value = '';
@@ -716,7 +980,6 @@
 
                         if (response.ok) {
                             await loadAdminUsers();
-                            await loadUsers();
                         } else {
                             alert('Ошибка при удалении пользователя');
                         }
@@ -791,20 +1054,8 @@
                     }
                 };
 
-                const loadUsers = async () => {
-                    try {
-                        const response = await fetch(`${API_BASE}/users/`);
-                        if (response.ok) {
-                            // Просто загружаем, но не используем здесь
-                            await response.json();
-                        }
-                    } catch (error) {
-                        console.error('Ошибка загрузки пользователей:', error);
-                    }
-                };
-
                 onMounted(() => {
-                    loadUsers();
+                    loadPosts();
                 });
 
                 return {
@@ -816,18 +1067,25 @@
                     currentUser,
                     showAdminModal,
                     showUsersManagement,
+                    showCreateModal,
+                    showEditModal,
                     adminPassword,
                     adminUsers,
                     posts,
                     registerData,
                     loginData,
                     newPost,
+                    editPost,
                     switchAuthMode,
                     checkAdminPassword,
                     deleteUser,
                     submitRegister,
                     submitLogin,
                     createPost,
+                    updatePost,
+                    deletePost,
+                    openEditModal,
+                    closeCreateModal,
                     logout,
                     formatDate
                 };
