@@ -1,0 +1,47 @@
+:root {
+  --bg: #0b1020;
+  --panel: #0f172a;
+  --text: #e2e8f0;
+  --accent: #38bdf8;
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica Neue, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  background: radial-gradient(1200px 800px at 70% -20%, #152042 0%, var(--bg) 50%);
+  color: var(--text);
+}
+
+.container {
+  max-width: 980px;
+  margin: 32px auto;
+  padding: 16px;
+}
+
+h1 { font-weight: 700; margin: 0 0 12px; }
+
+.difficulty { display: flex; gap: 8px; margin-bottom: 12px; }
+.difficulty button {
+  background: var(--panel);
+  border: 1px solid #1e293b;
+  color: var(--text);
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.difficulty button:hover { border-color: var(--accent); }
+
+canvas#maze {
+  width: 100%;
+  height: 60vh;
+  display: block;
+  border: 1px solid #1f2937;
+  border-radius: 10px;
+  background: #0b1223;
+}
+
+.status { margin-top: 10px; min-height: 24px; opacity: .9; }
+
+
