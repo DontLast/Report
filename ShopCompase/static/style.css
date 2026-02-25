@@ -1,0 +1,278 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Arial', sans-serif;
+}
+
+body {
+    background-color: #f0f0f0;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+/* Header */
+.header {
+    background-color: #2c3e50;
+    color: white;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.header-title {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.header-icon {
+    margin-right: 8px;
+}
+
+.header-buttons {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.header-btn {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.header-btn:hover {
+    background-color: #2980b9;
+}
+
+.encoding-input {
+    padding: 6px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    width: 120px;
+}
+
+/* Main container (левый + центр) */
+.main-container {
+    display: flex;
+    flex: 1;
+    padding: 20px;
+    gap: 15px;
+    overflow: hidden;
+}
+
+/* Левая панель */
+.left-panel {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    width: 260px;
+    padding: 20px 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    overflow-y: auto;
+}
+
+.filter-title {
+    font-size: 18px;
+    font-weight: bold;
+    color: #2c3e50;
+    margin-bottom: 5px;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.filter-group label {
+    font-size: 14px;
+    color: #333;
+}
+
+#searchInput {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.reset-btn {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 4px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 5px;
+}
+
+.reset-btn:hover {
+    background-color: #2980b9;
+}
+
+.shops-section {
+    margin-top: 10px;
+}
+
+.shops-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #2c3e50;
+    margin-bottom: 10px;
+}
+
+.shop-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    font-size: 13px;
+}
+
+.dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.shop-note {
+    margin-top: 15px;
+    font-size: 11px;
+    color: #777;
+    font-style: italic;
+}
+
+/* Центральная панель */
+.center-panel {
+    flex: 1;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.table-header {
+    background-color: #3498db;
+    color: white;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.table-title {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.update-time {
+    font-size: 14px;
+    opacity: 0.9;
+}
+
+.table-container {
+    flex: 1;
+    overflow: auto;
+    padding: 10px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 700px;
+}
+
+th {
+    background-color: #2c3e50;
+    color: white;
+    padding: 12px 8px;
+    text-align: left;
+    cursor: pointer;
+    user-select: none;
+    font-size: 14px;
+}
+
+th:hover {
+    background-color: #1a252f;
+}
+
+td {
+    padding: 10px 8px;
+    border-bottom: 1px solid #e0e0e0;
+    font-size: 13px;
+}
+
+tr:hover {
+    background-color: #f5f5f5;
+}
+
+/* Чередование фона строк */
+tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+/* Стиль для отсутствия товара (по аналогии с DNS) */
+tr.out-of-stock td {
+    background-color: #ffebee;
+}
+
+.number {
+    text-align: right;
+}
+
+/* Footer */
+.footer {
+    background-color: #2c3e50;
+    color: white;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+}
+
+#bestPriceLabel {
+    color: #27ae60;
+    font-weight: bold;
+}
+
+/* Индикатор загрузки */
+#progress {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: rgba(0,0,0,0.8);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 30px;
+    font-weight: bold;
+    z-index: 1000;
+}
+.category-select {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+    width: 100%;
+    background-color: white;
+}
+tr.selected {
+    background-color: #cfe2ff !important;
+}
