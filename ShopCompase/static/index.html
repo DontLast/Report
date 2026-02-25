@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>ShopCompase - Nix.ru</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Верхняя панель (header) -->
+    <div class="header">
+        <div class="header-title">
+            <span class="header-icon">🛒</span> ShopCompase - Nix.ru
+        </div>
+        <div class="header-buttons">
+            <button id="btnUrl" class="header-btn">🌐 Загрузить с сайта</button>
+            <button id="btnHtml" class="header-btn">📄 Загрузить HTML</button>
+            <input type="file" id="htmlFile" accept=".html,.htm" style="display:none">
+            <button id="btnCsv" class="header-btn">📁 Загрузить CSV</button>
+            <input type="file" id="csvFile" accept=".csv" style="display:none">
+            <label for="encoding" style="color:white; margin-left:10px;">Кодировка:</label>
+            <input type="text" id="encoding" value="utf-8-sig" placeholder="utf-8-sig" class="encoding-input">
+            <button id="btnSave" class="header-btn">💾 Сохранить CSV</button>
+            <button id="btnClear" class="header-btn">🗑️ Очистить</button>
+            <button id="btnCreateDeal" class="header-btn">📦 Создать сделку в Битрикс24</button>
+        </div>
+    </div>
+
+    <!-- Основной контейнер (левая панель + центральная область) -->
+    <div class="main-container">
+        <!-- Левая панель (фильтры) -->
+        <div class="left-panel">
+            <div class="filter-title">🔍 Фильтры</div>
+            <div class="filter-group">
+                <label for="searchInput">Поиск товара:</label>
+                <input type="text" id="searchInput" placeholder="Введите название...">
+            </div>
+            <div class="filter-group">
+                <label for="categorySelect">Категория:</label>
+                <select id="categorySelect" class="category-select">
+                    <option value="Все">Все категории</option>
+                </select>
+            </div>
+            <button id="resetFilters" class="reset-btn">Сбросить фильтры</button>
+
+            <div class="shops-section">
+                <div class="shops-title">🏪 Магазины Nix (информация)</div>
+                <div class="shop-item"><span class="dot" style="background:#e74c3c;"></span> Nix - "Новосибирск" (НИКС, НРЦДО)</div>
+                <div class="shop-item"><span class="dot" style="background:#3498db;"></span> Nix - "Томск" (НИКС, Компстар-Томск)</div>
+                <div class="shop-note">* данные о ценах в магазинах отсутствуют, отображаются цены с nix.ru</div>
+            </div>
+        </div>
+
+        <!-- Центральная область (таблица) -->
+        <div class="center-panel">
+            <div class="table-header">
+                <span class="table-title">📊 Сравнение цен</span>
+                <span class="update-time" id="updateTime">Обновлено: --</span>
+            </div>
+            <div class="table-container">
+                <table id="productTable">
+                    <thead>
+                        <tr>
+                            <th data-sort="name">Название</th>
+                            <th data-sort="availability">Наличие</th>
+                            <th data-sort="price_from">Цена от</th>
+                            <th data-sort="price_to">Цена до</th>
+                            <th data-sort="rating">Рейтинг</th>
+                            <th data-sort="price_novosibirsk">Новосибирск</th>
+                            <th data-sort="price_tomsk">Томск</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <!-- Данные вставляются скриптом -->
+                    </tbody>
+                </table>
+            </div>
+            <!-- Нижняя панель (footer) -->
+            <div class="footer">
+                <span id="totalLabel">Всего товаров: 0 | Магазинов: 2</span>
+                <span id="bestPriceLabel">💰 Лучшая цена: --</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Индикатор загрузки (всплывающий) -->
+    <div id="progress" style="display:none;">Загрузка...</div>
+
+    <script src="script.js"></script>
+</body>
+</html>
